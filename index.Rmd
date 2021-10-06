@@ -1,5 +1,6 @@
 ---
-title: "Tarea 2"
+title: "Tarea 2. Graficacion"
+author: "Ana Lucia Garita Fernandez"
 output: html_document
 ---
 
@@ -7,7 +8,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Preparativos carga de paquetes 
+## Carga de paquetes 
 
 ```{r carga librerias, message = FALSE}
 library(dplyr)
@@ -17,7 +18,7 @@ library(ggplot2)
 
 ## Carga de datos
 
-```{r carga-datos}
+```{r carga-datos, message = FALSE}
 
 # Carga de datos de rios desde un archivo CSV 
 rios <-
@@ -32,7 +33,8 @@ covid <-
 
 ```
 
-## (40%) Gráfico de barras apiladas que muestre el caudal de los ríos Pandora y Bananito por cada uno de los 12 meses del año.
+
+## Ejercicio 1. (40%) Gráfico de barras apiladas que muestre el caudal de los ríos Pandora y Bananito por cada uno de los 12 meses del año.
 
 ### Organizacion de datos
 ```{r organizacion-datos-rios}
@@ -61,12 +63,13 @@ ggplot(cauda_sum, aes(x = mes, y = caudales, fill = rio)) +
   geom_col() +
   ggtitle("Caudal de los ríos Pandora y Bananito") +
   xlab("Meses") +
-  ylab("Caudal")+
+  ylab("Caudal") +
+  scale_fill_manual(values = c("#669933", "red")) +
   labs(fill="Rio")
   
 ```
 
-## (20%) Histograma que muestre la distribución de los casos nuevos de covid en Costa Rica. Elija cuidadosamente el tamaño de los “bins”.
+## Ejercicio 2. (20%) Histograma que muestre la distribución de los casos nuevos de covid en Costa Rica. Elija cuidadosamente el tamaño de los “bins”.
 
 ### Organizacion de datos
 ```{r organizacion-datos-covid}
@@ -83,9 +86,9 @@ covid_posi <-
 #Histograma con opciones
 covid_posi %>%
   ggplot(aes(x = nuevos_positivos)) +
-  geom_histogram(binwidth = 50,
-                 color = "blue",
-                 fill = 'white') +
+  geom_histogram(binwidth = 150,
+                 color = "black",
+                 fill = "#FFCC66") +
   ggtitle("Histograma Casos Nuevos") +    
   xlab("Cantidad")+
   ylab("Frecuencia Casos")
@@ -93,7 +96,42 @@ covid_posi %>%
 ```
 
 
+## Ejercicio 3. (40%) Gráfico de barras agrupadas que muestre la cantidad de hombres y mujeres fallecidos por covid en Costa Rica por cada uno de los 12 meses del año.
 
+### Organizacion de datos
+```{r organizacion-datos-covid-fallecidos}
+covid_tabla_fallecidos <-
+  covid %>%
+  select(FECHA, muj_fall, hom_fall) %>%
+  rename(fecha_m = FECHA, mujeres = muj_fall, hombres = hom_fall) %>%
+  mutate(fecha_m = as.Date(fecha_m, format = "%d/%m/%Y")) %>%
+  group_by(fecha_m = format(fecha_m,"%m")) %>%
+  summarise(M = sum(mujeres), H = sum(hombres))
+```
 
+### Graficacion
+```{r graficacion-barras}
+ggplot() + 
+    ggtitle("Personas falledas por Covid agrupadas por mes") +
+  geom_col(
+    data = covid_tabla_fallecidos, 
+    aes(x = fecha_m, 
+        y = M, 
+        fill = "Mujeres"), 
+        width = 0.3, 
+        position = position_nudge(x = 0.2)) +
+  geom_col(
+    data = covid_tabla_fallecidos, 
+    aes(x = fecha_m, 
+        y = H, 
+        fill = "Hombres"), 
+        width = 0.3, 
+        position = position_nudge(x = -0.2)) +
+  scale_fill_manual (labels = c('Hombres', 'Mujeres'), 
+                     values = c("yellow", "green")) +
+  xlab("Mes") +
+  ylab("Fallecidos") +
+  labs(fill = "Sexo")
+```
 
 
